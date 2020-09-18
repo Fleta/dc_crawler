@@ -31,7 +31,10 @@ class Gall_lists(Crawl):
         soup = BeautifulSoup(resp.content, 'html.parser')
         title_atag_list = soup.select('div.section_cate > div.cate > ul > li > a')
         for single_atag in title_atag_list:
-            print(single_atag.string)
+            try:
+                print(single_atag.string, single_atag['href'].split('=')[1])
+            except(Exception):
+                pass
         
 
 class Gall_inside(Crawl):
