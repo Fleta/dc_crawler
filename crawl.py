@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from util import String_helper
+from util import Helper
 import requests
 
 class Crawl:
@@ -24,9 +24,9 @@ class Gall_lists(Crawl):
         resp = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(resp.content, 'html.parser')
         title_atag_list = soup.select('div.section_cate > div.cate > ul > li > a')
-        for single_atag in title_atag_list:
+        for atag in title_atag_list:
             try:
-                print(single_atag.string, single_atag['href'].split('=')[1])
+                print(atag.string, atag['href'].split('=')[1])
             except(Exception):
                 pass
         
@@ -36,5 +36,16 @@ class Gall_inside(Crawl):
         super().__init__()
 
     def find_yesterday_post(self, gall_code):
-        gall_url = String_helper.concat(self.gall_base_url, gall_code)
-        resp = requests.get(self.gall_base_url)
+        payload = Helper().make_params(id=gall_code)
+        resp = requests.get(self.gall_base_url, headers=self.headers, params=payload)
+        soup = BeautifulSoup(resp.content, 'html.parser')
+        post_list = soup.select('div.gall_listwrap > table.gall_list > tbody > tr.us-post') 
+        # ub-content는 설문, 뉴스 포함
+        # data-type기준 icon_notice=공지, icon_txt=짤 없는 글, icon_pic=짤 있는 글
+        for post in post_list:
+            if post['data-type'] == "icon_notice":
+                pass
+            else:
+                # TODO: WIP
+                pass
+    

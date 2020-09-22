@@ -1,4 +1,6 @@
 .python-version
 .vscode/
-test.py
 __pycache__/
+
+test.py
+testresult
