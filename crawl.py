@@ -18,7 +18,7 @@ class Gall_lists(Crawl):
         #cate_bind > cate_box > section_cate > cate_tit(=제목), list_num(=갤 개수)
         url = "https://gall.dcinside.com/"
         # if isMinor:
-        #     url = String_helper.concat(url, 'm')
+        #     url = Helper.concat(url, 'm')
         # 마갤 구조는 비슷한데 갯수가 너무 많아서 (약 1만6천) 전체 탐색은 의미 없음. 날짜별 실북갤만 수집하는게 좋을 듯
 
         resp = requests.get(url, headers=self.headers)
@@ -46,6 +46,11 @@ class Gall_inside(Crawl):
             if post['data-type'] == "icon_notice":
                 pass
             else:
-                # TODO: WIP
-                pass
-    
+                # print(post.select('td.gall_num')[0].string, post.select('td.gall_date')[0]['title'])
+                post_time_str = post.select('td.gall_date')[0]['title']
+                if Helper().is_post_today(post_time_Str):
+                    # WIP
+                    pass
+                elif Helper().is_post_yesterday(post_time_str):
+                    # WIP
+                    pass

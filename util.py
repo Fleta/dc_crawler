@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 class Helper:
     def __init__(self):
         pass
@@ -15,3 +17,13 @@ class Helper:
             #TODO: Type check?
             params[item[0]] = item[1]
         return params
+
+    # TODO: subtract to date-related class
+    def strtime_to_datetime(self, strtime):
+        return datetime.strptime(strtime, '%Y-%m-%d %H:%M:%S')
+    
+    def is_post_today(self, strtime):
+        return self.strtime_to_datetime(strtime).date() == datetime.now().date()
+
+    def is_post_yesterday(self, strtime):
+        return self.strtime_to_datetime(strtime).date() == (datetime.now() - timedelta(days=1)).date()
