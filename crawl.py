@@ -3,7 +3,6 @@ from util import Helper
 import requests
 
 class Crawl:
-    # TODO: 클래스 용도 세분화(gall_list, gall_inside 등의 이름이 너무 불분명해 보임)
     def __init__(self):
         self.gall_base_url = "https://gall.dcinside.com/board/lists/"
         self.mgall_base_url = "https://gall.dcinside.com/mgallery/board/lists/"
@@ -11,7 +10,7 @@ class Crawl:
         self.headers = {'User-Agent': self.user_agent, 'Accpet': 'text/*', 'Accept-Charset': 'utf-8'}
         
 
-class Gall_lists(Crawl):
+class Gall_crawler(Crawl):
     def __init__(self):
         super().__init__()
 
@@ -40,14 +39,9 @@ class Gall_lists(Crawl):
         """
         payload = Helper().make_params(id=gall_code, page=page_num)
         resp = requests.get(self.gall_base_url, headers=self.headers, params=payload)
-        print(type(BeautifulSoup(resp.content, 'html.parser')))
         return BeautifulSoup(resp.content, 'html.parser')
 
-
-class Gall_inside(Crawl):
-    def __init__(self):
-        super().__init__()
-
+    # TODO: recursion limit
     def find_yesterday_post(self, gall_code, page_num, first_post_num, last_post_num):
         """
         gall_code: 서치할 갤러리의 코드
@@ -58,7 +52,7 @@ class Gall_inside(Crawl):
         return: (first_post_num, last_post_num)
         """
 
-        soup = collect_page_post(gall_code, page_num)
+        soup = self.collect_page_post(gall_code, page_num)
         post_list = soup.select('div.gall_listwrap > table.gall_list > tbody > tr.us-post') 
         # ub-content는 설문, 뉴스 포함
         # data-type기준 icon_notice=공지, icon_txt=짤 없는 글, icon_pic=짤 있는 글
@@ -72,15 +66,15 @@ class Gall_inside(Crawl):
                     if last_post_num == -1:
                         last_post_num = post.select('td.gall_num')[0].string 
                 else:
-                    if Helper().is_post_today(post_time_Str):
+                    if Helper().is_post_today(post_time_str):
                         pass
                     elif first_post_num == -1:
                         first_post_num = post.select('td.gall_num')[0].string 
                     else:
                         break
-        if not (first_post_num == -1 or last_post_num == -1):
+        if first_post_num == -1 or last_post_num == -1:
             # TODO: have to search another page - WIP
-            find_yesterday_post(gall_code, page_num, first_post_num, last_post_num)
+            self.find_yesterday_post(gall_code, page_num+1, first_post_num, last_post_num)
         else:
             return (first_post_num, last_post_num)
         
