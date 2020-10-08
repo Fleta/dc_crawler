@@ -5,7 +5,6 @@ import requests
 class Crawl:
     def __init__(self):
         self.gall_base_url = "https://gall.dcinside.com/board/lists/"
-        self.mgall_base_url = "https://gall.dcinside.com/mgallery/board/lists/"
         self.user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"
         self.headers = {"User-Agent": self.user_agent, "Accpet": "text/*", "Accept-Charset": "utf-8"}
         
@@ -35,11 +34,25 @@ class Gall_crawler(Crawl):
 
         return: (bs4.BeautifulSoup) 
         """
+
         payload = Helper().make_params(id=gall_code, page=page_num)
         resp = requests.get(self.gall_base_url, headers=self.headers, params=payload)
-        return BeautifulSoup(resp.content, 'html.parser')
+        return BeautifulSoup(resp.content, "html.parser")
 
-    # TODO: recursion limit
+    def collect_single_post(self, gall_code, post_num):
+        """
+        gall_code: 글이 등록된 갤러리의 코드
+        post_num: 해당 글의 번호(링크에서 'no' 파라미터에 해당)
+
+        갤러리 코드와 포스트 번호에 일치하는 글을 수집한다
+
+        return: (bs4.BeautifulSoup) 
+        """
+
+        payload = Helper().make_params(id=gall_code, no=post_num)
+        resp = requests.get(self.gall_base_url, headers=self.headers, params=payload)
+        return BeautifulSoup(resp.content, "html.parser")
+
     def find_yesterday_post_range(self, gall_code, page_num, first_post_num, last_post_num):
         """
         gall_code: 서치할 갤러리의 코드
