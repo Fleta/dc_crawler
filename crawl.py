@@ -42,7 +42,7 @@ class Gall_crawler(Crawl):
         return BeautifulSoup(resp.content, 'html.parser')
 
     # TODO: recursion limit
-    def find_yesterday_post(self, gall_code, page_num, first_post_num, last_post_num):
+    def find_yesterday_post_range(self, gall_code, page_num, first_post_num, last_post_num):
         """
         gall_code: 서치할 갤러리의 코드
         page_num: 서치할 페이지 번호(그 페이지 안에서 서치 못 하면 다음 페이지로 넘겨서 재귀)
@@ -56,6 +56,20 @@ class Gall_crawler(Crawl):
         post_list = soup.select('div.gall_listwrap > table.gall_list > tbody > tr.us-post') 
         # ub-content는 설문, 뉴스 포함
         # data-type기준 icon_notice=공지, icon_txt=짤 없는 글, icon_pic=짤 있는 글
+
+        last_post_strtime = post_list[len(post_list) - 1].select('td.gall_date')[0]['title']
+        if last_post_num == -1 and not Helper().is_post_yesterday(last_post_strtime):
+            self.find_yesterday_post_range(gall_code, page_num+1, first_post_num, last_post_num)
+        elif (not last_post_num == -1 and first_post_num ==1)
+            and Helper().is_post_yesterday(last_post_strtime):
+            # find post number of last post of yesterday
+            pass # WIP
+        elif (not last_post_num == -1 and first_post_num ==1)
+            and not Helper().is_post_yesterday(last_post_strtime):
+            # find post number of first post of yesterday (and return tuple)
+            pass # WIP
+
+
         for post in post_list:
             if post['data-type'] == "icon_notice":
                 pass
@@ -74,7 +88,7 @@ class Gall_crawler(Crawl):
                         break
         if first_post_num == -1 or last_post_num == -1:
             # TODO: have to search another page - WIP
-            self.find_yesterday_post(gall_code, page_num+1, first_post_num, last_post_num)
+            self.find_yesterday_post_range(gall_code, page_num+1, first_post_num, last_post_num)
         else:
             return (first_post_num, last_post_num)
         
