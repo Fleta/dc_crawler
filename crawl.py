@@ -107,7 +107,7 @@ class Gall_crawler(Crawl):
                         else:
                             break
             if is_first_post_recursion and first_post_num == -1:
-                first_post_num = first_num_of_loop - 1
+                first_post_num = first_num_of_loop + 1
 
             if last_post_num == -1 or first_post_num == -1:
                 (first_post_num, last_post_num) = self.find_yesterday_post_range(
