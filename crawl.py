@@ -56,39 +56,55 @@ class Gall_crawler(Crawl):
         post_list = soup.select('div.gall_listwrap > table.gall_list > tbody > tr.us-post') 
         # ub-content는 설문, 뉴스 포함
         # data-type기준 icon_notice=공지, icon_txt=짤 없는 글, icon_pic=짤 있는 글
-
         last_post_strtime = post_list[len(post_list) - 1].select('td.gall_date')[0]['title']
-        if last_post_num == -1 and not Helper().is_post_yesterday(last_post_strtime):
-            self.find_yesterday_post_range(gall_code, page_num+1, first_post_num, last_post_num)
-        elif (not last_post_num == -1 and first_post_num ==1)
-            and Helper().is_post_yesterday(last_post_strtime):
-            # find post number of last post of yesterday
-            pass # WIP
-        elif (not last_post_num == -1 and first_post_num ==1)
-            and not Helper().is_post_yesterday(last_post_strtime):
-            # find post number of first post of yesterday (and return tuple)
-            pass # WIP
-
-
-        for post in post_list:
-            if post['data-type'] == "icon_notice":
-                pass
-            else:
-                # print(post.select('td.gall_num')[0].string, post.select('td.gall_date')[0]['title'])
-                post_time_str = post.select('td.gall_date')[0]['title']
-                if Helper().is_post_yesterday(post_time_str):
-                    if last_post_num == -1:
-                        last_post_num = post.select('td.gall_num')[0].string 
-                else:
-                    if Helper().is_post_today(post_time_str):
-                        pass
-                    elif first_post_num == -1:
-                        first_post_num = post.select('td.gall_num')[0].string 
-                    else:
-                        break
-        if first_post_num == -1 or last_post_num == -1:
-            # TODO: have to search another page - WIP
-            self.find_yesterday_post_range(gall_code, page_num+1, first_post_num, last_post_num)
-        else:
-            return (first_post_num, last_post_num)
+        is_last_post_recursion = False
+        is_first_post_recursion = False
         
+        if ( last_post_num == -1
+                and not Helper().is_post_yesterday(last_post_strtime) ):
+            # pass to next recursion
+            pass
+        elif ( last_post_num == -1
+                and Helper().is_post_yesterday(last_post_strtime) ):
+            # find post number of last post of yesterday
+            is_last_post_recursion = True
+        elif ( (not last_post_num == -1 and first_post_num == -1)
+                and not Helper().is_post_yesterday(last_post_strtime) ):
+            # find post number of first post of yesterday
+            is_first_post_recursion = True
+
+        is_first_after_notice = True
+
+        if is_last_post_recursion or is_first_post_recursion:
+            for post in post_list:
+                if ( post["data-type"] == "icon_notice"
+                        or post.select("td.gall_num")[0].string == "설문" ):
+                    pass
+                else:
+                    # print(post.select('td.gall_num')[0].string, post.select('td.gall_date')[0]['title'])
+                    post_time_str = post.select("td.gall_date")[0]["title"]
+                    if is_first_after_notice:
+                        first_num_of_loop = int(post.select("td.gall_num")[0].string)
+                    if Helper().is_post_yesterday(post_time_str):
+                        if is_first_post_recursion:
+                            pass
+                        elif last_post_num == -1:
+                            last_post_num = int(post.select('td.gall_num')[0].string)
+                    elif is_first_post_recursion:
+                        if first_post_num == -1:
+                            first_post_num = int(post.select('td.gall_num')[0].string)
+                        else:
+                            break
+            if is_first_post_recursion and first_post_num == -1:
+                first_post_num = first_num_of_loop - 1
+
+            if last_post_num == -1 or first_post_num == -1:
+                (first_post_num, last_post_num) = self.find_yesterday_post_range(
+                        gall_code, page_num+1, first_post_num, last_post_num)
+            else:
+                return (first_post_num, last_post_num)
+        else:
+            (first_post_num, last_post_num) = self.find_yesterday_post_range(
+                        gall_code, page_num+1, first_post_num, last_post_num)
+        
+        return (first_post_num, last_post_num)
