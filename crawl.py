@@ -13,20 +13,6 @@ class Gall_crawler(Crawl):
     def __init__(self):
         super().__init__()
 
-    def collect(self, isMinor):
-        # cate_bind > cate_box > section_cate > cate_tit(=제목), list_num(=갤 개수)
-        url = "https://gall.dcinside.com/"
-        # 마갤 구조는 비슷한데 갯수가 너무 많아서 (약 1만6천) 전체 탐색은 의미 없음. 
-
-        resp = requests.get(url, headers=self.headers)
-        soup = BeautifulSoup(resp.content, "html.parser")
-        title_atag_list = soup.select("div.section_cate > div.cate > ul > li > a")
-        for atag in title_atag_list:
-            try:
-                print(atag.string, atag["href"].split('=')[1])
-            except(Exception):
-                pass
-
     def collect_page_post(self, gall_code, page_num):
         """ 
         gall_code: 서치할 갤러리의 코드
